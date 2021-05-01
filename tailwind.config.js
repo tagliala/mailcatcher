@@ -1,10 +1,15 @@
 module.exports = {
   purge: [
+    './assets/javascripts/**/*.coffee',
     './views/**/*.erb'
   ],
-  darkMode: false, // or 'media' or 'class'
+  darkMode: 'media', // or 'media' or 'class'
   theme: {
-    extend: {},
+    extend: {
+      cursor: {
+        'ns-resize': 'ns-resize'
+      }
+    },
   },
   variants: {
     extend: {},

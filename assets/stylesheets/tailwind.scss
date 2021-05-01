@@ -1,3 +1,69 @@
 @tailwind base;
+
+@layer base {
+  a,
+  input {
+    @apply focus:outline-none focus:ring focus:border-blue-300
+  }
+}
+
 @tailwind components;
 @tailwind utilities;
+
+.js-tab--selected {
+  @apply bg-white border-gray-300 dark:bg-black dark:border-gray-600;
+  border-bottom-color: theme('colors.white');
+}
+
+.logo {
+  background: url(logo.png) left no-repeat;
+  background-size: 24px 24px;
+}
+
+.js-message-row {
+  @apply cursor-pointer align-text-top;
+
+  &:nth-child(even) {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+
+  &--selected {
+    @apply text-white bg-blue-500 !important;
+  }
+
+  td {
+    @apply px-2;
+
+    &:first-child {
+      @apply pl-4;
+    }
+
+    &:last-child {
+      @apply pr-4;
+    }
+  }
+}
+
+.js-metadata {
+  @apply px-4 py-6;
+
+  dt {
+    @apply absolute text-right w-32;
+  }
+
+  dd {
+    @apply ml-32 pl-4;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .js-tab--selected {
+    border-bottom-color: theme('colors.gray.900');
+  }
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (-o-min-device-pixel-ratio: 2/1), (min-resolution: 192dpi) {
+  .logo {
+    background-image: url(logo_2x.png)
+  }
+}

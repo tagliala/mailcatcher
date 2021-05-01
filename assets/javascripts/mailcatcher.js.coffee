@@ -12,22 +12,22 @@ jQuery.expr.pseudos.icontains = (a, i, m) ->
 
 class MailCatcher
   constructor: ->
-    $("#messages").on "click", "tr", (e) =>
+    $(document).on "click", ".js-message-row", (e) =>
       e.preventDefault()
       @loadMessage $(e.currentTarget).attr("data-message-id")
 
-    $("input[name=search]").on "keyup", (e) =>
+    $("#js-search").on "keyup", (e) =>
       query = $.trim $(e.currentTarget).val()
       if query
         @searchMessages query
       else
         @clearSearch()
 
-    $("#message").on "click", ".views .format.tab a", (e) =>
+    $(".js-tab__link").on "click", (e) =>
       e.preventDefault()
       @loadMessageBody @selectedMessage(), $($(e.currentTarget).parent("li")).data("message-format")
 
-    $("#message iframe").on "load", =>
+    $("#js-message-iframe").on "load", =>
       @decorateMessageBody()
 
     $("#resizer").on "mousedown", (e) =>
@@ -43,7 +43,7 @@ class MailCatcher
 
     @resizeToSaved()
 
-    $("nav.app .clear a").on "click", (e) =>
+    $("#js-clear").on "click", (e) =>
       e.preventDefault()
       if confirm "You will lose all your received messages.\n\nAre you sure you want to clear all messages?"
         $.ajax
@@ -54,13 +54,13 @@ class MailCatcher
           error: ->
             alert "Error while clearing all messages."
 
-    $("nav.app .quit a").on "click", (e) =>
+    $("#js-quit").on "click", (e) =>
       e.preventDefault()
       if confirm "You will lose all your received messages.\n\nAre you sure you want to quit?"
         $.ajax
           type: "DELETE"
           success: ->
-            location.replace $("body > header h1 a").attr("href")
+            location.replace $("#js-mailcatcher-link").attr("href")
           error: ->
             alert "Error while quitting."
 
@@ -68,24 +68,24 @@ class MailCatcher
 
     key "up", =>
       if @selectedMessage()
-        @loadMessage $("#messages tr.selected").prevAll(":visible").first().data("message-id")
+        @loadMessage $(".js-message-row--selected").prevAll(":visible").first().data("message-id")
       else
-        @loadMessage $("#messages tbody tr[data-message-id]").first().data("message-id")
+        @loadMessage $(".js-message-row[data-message-id]").first().data("message-id")
       false
 
     key "down", =>
       if @selectedMessage()
-        @loadMessage $("#messages tr.selected").nextAll(":visible").data("message-id")
+        @loadMessage $(".js-message-row--selected").nextAll(":visible").data("message-id")
       else
-        @loadMessage $("#messages tbody tr[data-message-id]:first").data("message-id")
+        @loadMessage $(".js-message-row[data-message-id]:first").data("message-id")
       false
 
     key "⌘+up, ctrl+up", =>
-      @loadMessage $("#messages tbody tr[data-message-id]:visible").first().data("message-id")
+      @loadMessage $(".js-message-row[data-message-id]:visible").first().data("message-id")
       false
 
     key "⌘+down, ctrl+down", =>
-      @loadMessage $("#messages tbody tr[data-message-id]:visible").first().data("message-id")
+      @loadMessage $(".js-message-row[data-message-id]:visible").first().data("message-id")
       false
 
     key "left", =>
@@ -137,13 +137,13 @@ class MailCatcher
     document.title = 'MailCatcher (' + @messagesCount() + ')'
 
   tabs: ->
-    $("#message ul").children(".tab")
+    $(".js-tab")
 
   getTab: (i) =>
     $(@tabs()[i])
 
   selectedTab: =>
-    @tabs().index($("#message li.tab.selected"))
+    @tabs().index($(".js-tab--selected"))
 
   openTab: (i) =>
     @getTab(i).children("a").click()
@@ -166,14 +166,14 @@ class MailCatcher
 
   haveMessage: (message) ->
     message = message.id if message.id?
-    $("""#messages tbody tr[data-message-id="#{message}"]""").length > 0
+    $(""".js-message-row[data-message-id="#{message}"]""").length > 0
 
   selectedMessage: ->
-    $("#messages tr.selected").data "message-id"
+    $(".js-message-row--selected").data "message-id"
 
   searchMessages: (query) ->
     selector = (":icontains('#{token}')" for token in query.split /\s+/).join("")
-    $rows = $("#messages tbody tr")
+    $rows = $(".js-message-row")
     $rows.not(selector).hide()
     $rows.filter(selector).show()
 
@@ -181,7 +181,7 @@ class MailCatcher
     $("#messages tbody tr").show()
 
   addMessage: (message) ->
-    $("<tr />").attr("data-message-id", message.id.toString())
+    $("<tr class=\"js-message-row\" />").attr("data-message-id", message.id.toString())
       .append($("<td/>").text(message.sender or "No sender").toggleClass("blank", !message.sender))
       .append($("<td/>").text((message.recipients || []).join(", ") or "No receipients").toggleClass("blank", !message.recipients.length))
       .append($("<td/>").text(message.subject or "No subject").toggleClass("blank", !message.subject))
@@ -190,8 +190,8 @@ class MailCatcher
     @updateMessagesCount()
 
   removeMessage: (id) ->
-    messageRow = $("""#messages tbody tr[data-message-id="#{id}"]""")
-    isSelected = messageRow.is(".selected")
+    messageRow = $(""".js-message-row[data-message-id="#{id}"]""")
+    isSelected = messageRow.is(".js-tab--selected")
     if isSelected
       switchTo = messageRow.next().data("message-id") || messageRow.prev().data("message-id")
     messageRow.remove()
@@ -203,7 +203,7 @@ class MailCatcher
     @updateMessagesCount()
 
   clearMessages: ->
-    $("#messages tbody tr").remove()
+    $(".js-message-row").remove()
     @unselectMessage()
     @updateMessagesCount()
 
@@ -217,27 +217,27 @@ class MailCatcher
         $("#messages").scrollTop($("#messages").scrollTop() + overflow + 20)
 
   unselectMessage: ->
-    $("#messages tbody, #message .metadata dd").empty()
-    $("#message .metadata .attachments").hide()
-    $("#message iframe").attr("src", "about:blank")
+    $(".js-metadata dd").empty()
+    $(".js-metadata .attachments").hide()
+    $("#js-message-iframe").attr("src", "about:blank")
     null
 
   loadMessage: (id) ->
     id = id.id if id?.id?
-    id ||= $("#messages tr.selected").attr "data-message-id"
+    id ||= $(".js-message-row--selected").attr "data-message-id"
 
     if id?
-      $("#messages tbody tr:not([data-message-id='#{id}'])").removeClass("selected")
-      messageRow = $("#messages tbody tr[data-message-id='#{id}']")
-      messageRow.addClass("selected")
+      $(".js-message-row:not([data-message-id='#{id}'])").removeClass("js-message-row--selected")
+      messageRow = $(".js-message-row[data-message-id='#{id}']")
+      messageRow.addClass("js-message-row--selected")
       @scrollToRow(messageRow)
 
       $.getJSON "messages/#{id}.json", (message) =>
-        $("#message .metadata dd.created_at").text(@formatDate message.created_at)
-        $("#message .metadata dd.from").text(message.sender)
-        $("#message .metadata dd.to").text((message.recipients || []).join(", "))
-        $("#message .metadata dd.subject").text(message.subject)
-        $("#message .views .tab.format").each (i, el) ->
+        $("dd.js-metadata__created_at").text(@formatDate message.created_at)
+        $("dd.js-metadata__from").text(message.sender)
+        $("dd.js-metadata__to").text((message.recipients || []).join(", "))
+        $("dd.js-metadata__subject").text(message.subject)
+        $(".js-tab").each (i, el) ->
           $el = $(el)
           format = $el.attr("data-message-format")
           if $.inArray(format, message.formats) >= 0
@@ -246,43 +246,43 @@ class MailCatcher
           else
             $el.hide()
 
-        if $("#message .views .tab.selected:not(:visible)").length
-          $("#message .views .tab.selected").removeClass("selected")
-          $("#message .views .tab:visible:first").addClass("selected")
+        if $(".js-tab--selected:not(:visible)").length
+          $(".js-tab--selected").removeClass("js-tab--selected")
+          $(".js-tab:visible:first").addClass("js-tab--selected")
 
         if message.attachments.length
-          $ul = $("<ul/>").appendTo($("#message .metadata dd.attachments").empty())
+          $ul = $("<ul/>").appendTo($("dd.js-metadata__attachments").empty())
 
           $.each message.attachments, (i, attachment) ->
             $ul.append($("<li>").append($("<a>").attr("href", "messages/#{id}/parts/#{attachment["cid"]}").addClass(attachment["type"].split("/", 1)[0]).addClass(attachment["type"].replace("/", "-")).text(attachment["filename"])))
-          $("#message .metadata .attachments").show()
+          $(".js-metadata__attachments").show()
         else
-          $("#message .metadata .attachments").hide()
+          $(".js-metadata__attachments").hide()
 
-        $("#message .views .download a").attr("href", "messages/#{id}.eml")
+        $("#js-download").attr("href", "messages/#{id}.eml")
 
         @loadMessageBody()
 
   loadMessageBody: (id, format) ->
     id ||= @selectedMessage()
-    format ||= $("#message .views .tab.format.selected").attr("data-message-format")
+    format ||= $(".js-tab--selected").attr("data-message-format")
     format ||= "html"
 
-    $("""#message .views .tab[data-message-format="#{format}"]:not(.selected)""").addClass("selected")
-    $("""#message .views .tab:not([data-message-format="#{format}"]).selected""").removeClass("selected")
+    $(""".js-tab[data-message-format="#{format}"]:not(.js-tab--selected)""").addClass("js-tab--selected")
+    $(""".js-tab:not([data-message-format="#{format}"]).js-tab--selected""").removeClass("js-tab--selected")
 
     if id?
-      $("#message iframe").attr("src", "messages/#{id}.#{format}")
+      $("#js-message-iframe").attr("src", "messages/#{id}.#{format}")
 
   decorateMessageBody: ->
-    format = $("#message .views .tab.format.selected").attr("data-message-format")
+    format = $(".js-tab--selected").attr("data-message-format")
 
     switch format
       when "html"
-        body = $("#message iframe").contents().find("body")
+        body = $("#js-message-iframe").contents().find("body")
         $("a", body).attr("target", "_blank")
       when "plain"
-        message_iframe = $("#message iframe").contents()
+        message_iframe = $("#js-message-iframe").contents()
         text = message_iframe.text()
         text = text.replace(/&/g, "&amp;")
         text = text.replace(/</g, "&lt;")
