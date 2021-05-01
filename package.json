@@ -1,0 +1,29 @@
+{
+  "devDependencies": {
+    "autoprefixer": "^10.2.5",
+    "postcss": "^8.2.13",
+    "postcss-cli": "^8.3.1",
+    "tailwindcss": "^2.1.2"
+  },
+  "name": "MailCatcher",
+  "description": "Catches mail and serves it through a dream.",
+  "version": "1.0.0",
+  "main": "",
+  "directories": {
+    "example": "examples",
+    "lib": "lib"
+  },
+  "scripts": {
+    "build": "postcss assets/stylesheets/tailwind.scss -o public/assets/tailwind.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sj26/mailcatcher.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sj26/mailcatcher/issues"
+  },
+  "homepage": "https://mailcatcher.me/"
+}
